@@ -1,0 +1,28 @@
+# Node
+node_modules/
+.npm/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Vite
+dist/
+.env
+.env.local
+.env.*.local
+
+# Editor/OS
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# TypeScript
+*.tsbuildinfo
+
+# local dev
+.nyc_output/
+coverage/
+
+# Misc
+*.local
