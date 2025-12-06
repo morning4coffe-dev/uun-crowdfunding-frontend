@@ -9,12 +9,12 @@ import { toast } from 'sonner';
 
 export function Login() {
   const { login, register } = useAuth();
-  
+
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   // Form Fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,12 +50,12 @@ export function Login() {
 
   return (
     <div className="w-full min-h-screen lg:grid lg:grid-cols-2">
-      
+
       {/* LEFT SIDE: Visuals (Hidden on Mobile, Visible on Desktop) */}
       <div className="hidden bg-zinc-900 lg:flex flex-col justify-between p-12 text-white relative overflow-hidden">
         {/* Subtle background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-800 to-black z-0" />
-        
+
         <div className="relative z-10 flex items-center gap-2 text-xl font-semibold">
           <div className="flex items-center justify-center w-8 h-8 bg-white/10 rounded-lg backdrop-blur-sm">
             <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
@@ -80,7 +80,7 @@ export function Login() {
       {/* RIGHT SIDE: Form (Centered on Mobile) */}
       <div className="flex items-center justify-center py-12 px-4 sm:px-8 bg-background">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 max-w-sm">
-          
+
           {/* Mobile Logo */}
           <div className="flex flex-col space-y-2 text-center lg:text-left">
             <div className="lg:hidden flex justify-center mb-4">
@@ -92,8 +92,8 @@ export function Login() {
               {isLogin ? 'Welcome back' : 'Create an account'}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {isLogin 
-                ? 'Enter your credentials to access your account' 
+              {isLogin
+                ? 'Enter your credentials to access your account'
                 : 'Enter your information below to get started'}
             </p>
           </div>
@@ -163,7 +163,7 @@ export function Login() {
                 <div className="absolute left-3 top-1/2 -translate-y-1/2">
                   <Lock className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 </div>
-                
+
                 {/* INPUT (Added pl-10 left, pr-10 right) */}
                 <Input
                   id="password"
@@ -176,7 +176,7 @@ export function Login() {
                   disabled={isLoading}
                   minLength={6}
                 />
-                
+
                 {/* ICON RIGHT (Eye Toggle) */}
                 <button
                   type="button"
@@ -221,10 +221,10 @@ export function Login() {
           </div>
 
           {/* Toggle Login/Register */}
-          <Button 
-            variant="outline" 
-            className="w-full" 
-            onClick={handleToggleMode} 
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleToggleMode}
             disabled={isLoading}
           >
             {isLogin ? (

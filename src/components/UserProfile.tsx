@@ -1,7 +1,8 @@
-import { Mail, MapPin, Calendar, Edit2, CreditCard, Bell, LogOut, Shield } from 'lucide-react';
+import { Mail, MapPin, Calendar, Edit2, CreditCard, Bell, LogOut, Shield, Moon, Sun } from 'lucide-react';
 import { User } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import {
   AlertDialog,
@@ -15,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from './ui/alert-dialog';
 import { toast } from 'sonner';
+import { useSettings } from '../context/SettingsContext';
 
 interface UserProfileProps {
   user: User;
@@ -23,11 +25,36 @@ interface UserProfileProps {
 export function UserProfile({ user }: UserProfileProps) {
   const { logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { theme, setTheme, notificationSettings, updateNotificationSettings, location, setLocation } = useSettings();
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     await logout();
     // Component will unmount after logout, no need for cleanup
+  };
+
+  const navigate = useNavigate();
+
+  const handleLogoutAndNavigate = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
+    if (typeof window !== 'undefined') {
+      window.location.replace('/login');
+    } else {
+      navigate('/login');
+    }
+  };
+
+  const handleFakePaymentManage = () => {
+    toast.info('Payment methods are managed during checkout for this demo.');
+  };
+
+  const handleLocationSave = () => {
+    toast.success('Location updated');
   };
 
   const getRoleDisplay = (role: string) => {
@@ -48,7 +75,7 @@ export function UserProfile({ user }: UserProfileProps) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       {/* Profile Header */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200">
+      <div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <div className="w-24 h-24 bg-gradient-to-br from-primary to-purple-600 rounded-full flex items-center justify-center text-white flex-shrink-0">
             <span className="text-3xl">{user.name.charAt(0)}</span>
@@ -82,27 +109,55 @@ export function UserProfile({ user }: UserProfileProps) {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-5 border border-gray-200 text-center">
-          <div className="text-primary mb-1">{user.stats?.totalProjectsOwned || user.createdProjects.length}</div>
+        <div className="bg-white dark:bg-card rounded-xl p-5 border border-gray-200 text-center">
+          <div className="text-primary mb-1">{user.stats?.totalProjectsOwned ?? user.createdProjects.length}</div>
           <p className="text-gray-600">Projects Created</p>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-gray-200 text-center">
-          <div className="text-primary mb-1">{user.stats?.totalContributed || user.backedProjects.length}</div>
+        <div className="bg-white dark:bg-card rounded-xl p-5 border border-gray-200 text-center">
+          <div className="text-primary mb-1">{user.stats?.totalContributed ?? user.backedProjects.length}</div>
           <p className="text-gray-600">Projects Backed</p>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-gray-200 text-center">
+        <div className="bg-white dark:bg-card rounded-xl p-5 border border-gray-200 text-center">
           <div className="text-primary mb-1">$0</div>
           <p className="text-gray-600">Total Pledged</p>
         </div>
       </div>
 
       {/* Account Settings */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-card rounded-xl border border-gray-200 overflow-hidden">
         <div className="p-6 border-b border-gray-200">
-          <h3>Account Settings</h3>
+          <div className="flex items-center justify-between gap-4">
+            <h3>Account Settings</h3>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-600">Theme</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              >
+                {theme === 'light' ? (
+                  <>
+                    <Moon className="w-4 h-4" />
+                    <span>Dark</span>
+                  </>
+                ) : (
+                  <>
+                    <Sun className="w-4 h-4" />
+                    <span>Light</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
         <div className="divide-y divide-gray-200">
-          <button className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+          <button
+            type="button"
+            onClick={handleFakePaymentManage}
+            className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
+          >
             <div className="flex items-center gap-3">
               <CreditCard className="w-5 h-5 text-gray-600" />
               <div className="text-left">
@@ -113,27 +168,61 @@ export function UserProfile({ user }: UserProfileProps) {
             <span className="text-gray-400">›</span>
           </button>
 
-          <button className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-            <div className="flex items-center gap-3">
-              <Bell className="w-5 h-5 text-gray-600" />
-              <div className="text-left">
-                <div className="text-gray-900">Notifications</div>
-                <p className="text-gray-600">Configure your notification preferences</p>
+          <div className="px-6 py-4 flex flex-col gap-3">
+            <div className="flex items-start gap-3">
+              <Bell className="w-5 h-5 text-gray-600 mt-1" />
+              <div className="flex-1">
+                <div className="text-gray-900 mb-1">Notifications</div>
+                <p className="text-gray-600 mb-3">Configure your notification preferences</p>
+                <div className="space-y-2 text-sm">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={notificationSettings.emailBackedProjects}
+                      onChange={(e) => updateNotificationSettings({ emailBackedProjects: e.target.checked })}
+                    />
+                    <span>Email updates about backed projects</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={notificationSettings.emailCreatedProjects}
+                      onChange={(e) => updateNotificationSettings({ emailCreatedProjects: e.target.checked })}
+                    />
+                    <span>Email updates about your own projects</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={notificationSettings.productUpdates}
+                      onChange={(e) => updateNotificationSettings({ productUpdates: e.target.checked })}
+                    />
+                    <span>Product news and feature updates</span>
+                  </label>
+                </div>
               </div>
             </div>
-            <span className="text-gray-400">›</span>
-          </button>
+          </div>
 
-          <button className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-            <div className="flex items-center gap-3">
-              <MapPin className="w-5 h-5 text-gray-600" />
-              <div className="text-left">
-                <div className="text-gray-900">Location</div>
-                <p className="text-gray-600">Update your address and region</p>
+          <div className="px-6 py-4 flex items-start gap-3 border-t border-gray-200">
+            <MapPin className="w-5 h-5 text-gray-600 mt-1" />
+            <div className="flex-1">
+              <div className="text-gray-900 mb-1">Location</div>
+              <p className="text-gray-600 mb-3">Update your address and region</p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="City, Country"
+                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                />
+                <Button type="button" variant="outline" size="sm" onClick={handleLocationSave}>
+                  Save
+                </Button>
               </div>
             </div>
-            <span className="text-gray-400">›</span>
-          </button>
+          </div>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -157,7 +246,7 @@ export function UserProfile({ user }: UserProfileProps) {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
+                <AlertDialogAction onClick={handleLogoutAndNavigate} disabled={isLoggingOut}>
                   {isLoggingOut ? 'Signing out...' : 'Sign out'}
                 </AlertDialogAction>
               </AlertDialogFooter>

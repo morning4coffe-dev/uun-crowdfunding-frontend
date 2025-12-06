@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import { Dashboard } from './components/Dashboard';
 import { ProjectDiscovery } from './components/ProjectDiscovery';
 import { ProjectDetail } from './components/ProjectDetail';
 import { CreateProject } from './components/CreateProject';
 import { UserProfile } from './components/UserProfile';
 import { AdminPanel } from './components/AdminPanel';
+import { ContributionList } from './components/ContributionList';
 import { BottomNav } from './components/BottomNav';
 import { Header } from './components/Header';
 import { useAuth } from './context/AuthContext';
@@ -96,11 +97,13 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Navigate to="/" replace />} />
           <Route element={<AppLayout user={mappedUser} />}>
-            <Route index element={<Dashboard user={mappedUser} />} />
+            <Route index element={<DashboardRoute user={mappedUser} />} />
             <Route path="discover" element={<ProjectDiscovery />} />
             <Route path="projects/:projectId" element={<ProjectDetail />} />
             <Route path="create" element={<CreateProject user={mappedUser} />} />
+            <Route path="projects/:projectId/edit" element={<CreateProject user={mappedUser} />} />
             <Route path="profile" element={<UserProfile user={mappedUser} />} />
+            <Route path="contributions" element={<ContributionList />} />
             <Route
               path="admin"
               element={
@@ -120,6 +123,15 @@ export default function App() {
       )}
     </>
   );
+}
+
+function DashboardRoute({ user }: { user: any }) {
+  const navigate = useNavigate();
+
+  const handleCreate = () => navigate('/create');
+  const handleViewProject = (projectId: string) => navigate(`/projects/${projectId}`);
+
+  return <Dashboard user={user} onCreate={handleCreate} onViewProject={handleViewProject} />;
 }
 
 function AppLayout({ user }: { user: User }) {

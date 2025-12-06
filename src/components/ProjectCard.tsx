@@ -12,7 +12,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link
       to={`/projects/${project.id}`}
-      className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer block"
+      className="bg-white dark:bg-card rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer block"
     >
       <div className="relative h-48 bg-gray-200">
         <img

@@ -876,6 +876,60 @@
     background-color: var(--color-white);
   }
 
+  /* Dark mode overrides for commonly-used utility classes */
+  .dark .bg-white {
+    background-color: var(--color-card);
+  }
+
+  .dark .bg-white\/95 {
+    background-color: color-mix(in oklab, var(--color-card) 95%, transparent);
+  }
+
+  .dark .border-gray-200 {
+    border-color: rgba(255,255,255,0.06);
+  }
+
+  .dark .border-gray-100 {
+    border-color: rgba(255,255,255,0.04);
+  }
+
+  .dark .border-gray-300 {
+    border-color: rgba(255,255,255,0.08);
+  }
+
+  .dark .bg-white\/80 {
+    background-color: color-mix(in oklab, var(--color-card) 80%, transparent);
+  }
+
+  .dark .bg-white\/10 {
+    background-color: color-mix(in oklab, var(--color-card) 10%, transparent);
+  }
+
+  .dark .bg-gray-100 {
+    background-color: rgba(255,255,255,0.02);
+  }
+
+  .dark .shadow-sm {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  }
+
+  .dark .text-gray-600 {
+    color: rgba(255,255,255,0.7);
+  }
+
+  .dark .text-gray-700 {
+    color: rgba(255,255,255,0.85);
+  }
+
+  .dark .bg-gray-50 {
+    background-color: var(--color-background);
+  }
+
+  .dark .hover\:bg-gray-50:hover {
+    background-color: rgba(255,255,255,0.03);
+  }
+
+
   .bg-gradient-to-br {
     --tw-gradient-position: to bottom right in oklab;
     background-image: linear-gradient(var(--tw-gradient-stops));

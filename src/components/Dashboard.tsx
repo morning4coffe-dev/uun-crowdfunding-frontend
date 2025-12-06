@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { TrendingUp, Clock, CheckCircle, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { TrendingUp, Clock, CheckCircle, Loader2, DollarSign } from 'lucide-react';
 import { User, Project } from '../App';
 import { ProjectCard } from './ProjectCard';
 import client from '../api/client';
@@ -12,6 +13,7 @@ interface DashboardProps {
 }
 
 export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
+  const navigate = useNavigate();
   const [createdProjects, setCreatedProjects] = useState<Project[]>([]);
   const [backedProjects, setBackedProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -136,11 +138,23 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {createdProjects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onViewProject={onViewProject}
-              />
+              <div key={project.id} className="relative">
+                <ProjectCard
+                  project={project}
+                  onViewProject={onViewProject}
+                />
+                {(project.status === 'draft' || project.status === 'pending') && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate(`/projects/${project.id}/edit`);
+                    }}
+                    className="absolute top-3 right-3 bg-white px-3 py-1 rounded-full text-sm hover:bg-gray-50 transition-colors border border-gray-200 shadow-sm"
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -166,9 +180,9 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
       )}
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200">
+      <div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200">
         <h3 className="mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
             type="button"
             onClick={onCreate}
@@ -176,8 +190,20 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
           >
             Start a New Project
           </button>
-          <button type="button" className="bg-white border-2 border-primary text-primary px-6 py-3 rounded-lg hover:bg-primary/5 transition-colors">
+          <button
+            type="button"
+            onClick={() => navigate('/discover')}
+            className="bg-white border-2 border-primary text-primary px-6 py-3 rounded-lg hover:bg-primary/5 transition-colors"
+          >
             Discover Projects
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/contributions')}
+            className="bg-white border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+          >
+            <DollarSign className="w-5 h-5" />
+            My Contributions
           </button>
         </div>
       </div>

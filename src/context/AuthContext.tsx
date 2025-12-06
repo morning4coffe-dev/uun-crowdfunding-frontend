@@ -88,16 +88,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const toggleFounder = () => {
     if (!user) return;
-    try {
-      const hasFounder = user.roles?.includes('founder');
-      const newRoles = hasFounder
-        ? user.roles.filter((r) => r !== 'founder')
-        : Array.from(new Set([...(user.roles || []), 'founder']));
-      setUser({ ...user, roles: newRoles });
-      console.log('Debug: toggled founder role. New roles:', newRoles);
-    } catch (err) {
-      console.error('toggleFounder error', err);
-    }
+    (async () => {
+      try {
+        const res = await client.post('/auth/toggle-founder');
+        const newRoles = res.data.roles;
+        setUser({ ...user, roles: newRoles });
+        console.log('Debug: toggled founder role. New roles:', newRoles);
+      } catch (err) {
+        console.error('toggleFounder error', err);
+      }
+    })();
   };
 
   return (

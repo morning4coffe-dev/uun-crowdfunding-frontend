@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Plus, X, Loader2 } from 'lucide-react';
 import { User, Reward } from '../App';
 import client from '../api/client';
-import { ProjectCategory } from '../types/api';
+import { ProjectCategory, Project as ApiProject } from '../types/api';
 
 interface CreateProjectProps {
   user: User;
@@ -11,8 +11,12 @@ interface CreateProjectProps {
 
 export function CreateProject({ user }: CreateProjectProps) {
   const navigate = useNavigate();
+  const { projectId } = useParams<{ projectId?: string }>();
+  const isEditMode = Boolean(projectId);
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(isEditMode);
+  const [existingProject, setExistingProject] = useState<ApiProject | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     category: 'Technology',
@@ -23,6 +27,57 @@ export function CreateProject({ user }: CreateProjectProps) {
     imageUrl: '',
   });
   const [rewards, setRewards] = useState<Partial<Reward>[]>([]);
+
+  useEffect(() => {
+    if (isEditMode && projectId) {
+      fetchProject(projectId);
+    }
+  }, [projectId, isEditMode]);
+
+  const fetchProject = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const response = await client.get(`/projects/${id}`);
+      const project: ApiProject = response.data;
+      
+      // Check if user owns this project
+      const ownerId = typeof project.ownerId === 'string' ? project.ownerId : project.ownerId._id;
+      if (ownerId !== user.id && user.role !== 'admin') {
+        alert('You do not have permission to edit this project');
+        navigate('/');
+        return;
+      }
+
+      // Populate form with existing data
+      setExistingProject(project);
+      setFormData({
+        title: project.title,
+        category: project.category.charAt(0).toUpperCase() + project.category.slice(1).toLowerCase(),
+        shortDescription: project.shortDescription,
+        description: project.description,
+        fundingGoal: project.targetAmount.toString(),
+        duration: '30', // Cannot change deadline in edit mode
+        imageUrl: project.images[0] || '',
+      });
+
+      // Map rewards
+      setRewards(
+        project.rewards.map((r) => ({
+          id: r.id,
+          title: r.title,
+          amount: r.price,
+          description: r.description,
+          estimatedDelivery: '', // Not stored in backend
+        }))
+      );
+    } catch (error: any) {
+      console.error('Failed to fetch project:', error);
+      alert('Failed to load project for editing');
+      navigate('/');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const categories = Object.values(ProjectCategory).map(c => c.charAt(0).toUpperCase() + c.slice(1).toLowerCase());
 
@@ -50,53 +105,121 @@ export function CreateProject({ user }: CreateProjectProps) {
   };
 
   const handleSubmit = async () => {
+    // Client-side validation to prevent invalid payloads reaching the API
+    const errors: string[] = [];
+    if (!formData.title || formData.title.trim().length < 3) {
+      errors.push('Title must be at least 3 characters');
+    }
+    if (!formData.shortDescription || formData.shortDescription.trim().length < 10) {
+      errors.push('Short description must be at least 10 characters');
+    }
+    if (!formData.description || formData.description.trim().length < 50) {
+      errors.push('Description must be at least 50 characters');
+    }
+    const parsedFunding = parseFloat(formData.fundingGoal || '');
+    if (isNaN(parsedFunding) || parsedFunding <= 0) {
+      errors.push('Funding goal must be a positive number');
+    }
+
+    if (errors.length > 0) {
+      alert(`Please fix the following errors:\n- ${errors.join('\n- ')}`);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // 1. Create Project
-      const deadline = new Date();
-      deadline.setDate(deadline.getDate() + parseInt(formData.duration));
-
-      const projectPayload = {
-        title: formData.title,
-        shortDescription: formData.shortDescription,
-        description: formData.description,
-        category: formData.category.toLowerCase(),
-        targetAmount: parseFloat(formData.fundingGoal),
-        deadlineAt: deadline.toISOString(),
-        images: formData.imageUrl ? [formData.imageUrl] : [],
-      };
-
-      const projectRes = await client.post('/projects', projectPayload);
-      const projectId = projectRes.data._id;
-
-      // 2. Add Rewards
-      for (const reward of rewards) {
-        await client.post(`/projects/${projectId}/rewards`, {
-          title: reward.title,
-          description: reward.description,
-          price: reward.amount,
-          limit: null, // Optional limit
-        });
+      // Double-check client-side that the user has permission to create
+      // Note: backend role name is 'founder' — frontend `user.role` maps to 'creator',
+      // so check both possibilities to be safe.
+      if (user.role !== 'creator' && user.role !== 'admin') {
+        throw new Error('You need the Founder role to create a project.');
       }
 
-      // 3. Submit for Approval
-      await client.post(`/projects/${projectId}/submit`);
+      if (isEditMode && projectId) {
+        // EDIT MODE: Update existing project
+        const projectPayload = {
+          title: formData.title,
+          shortDescription: formData.shortDescription,
+          description: formData.description,
+          category: formData.category.toLowerCase(),
+          targetAmount: parseFloat(formData.fundingGoal),
+          images: formData.imageUrl ? [formData.imageUrl] : [],
+        };
 
-      alert('Project submitted for review! An administrator will review it soon.');
+        await client.patch(`/projects/${projectId}`, projectPayload);
+
+        // Update rewards (simplified: we don't handle reward deletion here)
+        // In a full implementation, you'd sync rewards properly
+        for (const reward of rewards) {
+          if (reward.id && reward.id.startsWith('reward-')) {
+            // New reward
+            await client.post(`/projects/${projectId}/rewards`, {
+              title: reward.title,
+              description: reward.description,
+              price: reward.amount,
+              limit: null,
+            });
+          }
+          // For existing rewards, would need PATCH endpoint
+        }
+
+        // Optionally resubmit for approval if it's a draft
+        if (existingProject?.status === 'draft') {
+          await client.post(`/projects/${projectId}/submit`);
+          alert('Project updated and submitted for review!');
+        } else {
+          alert('Project updated successfully!');
+        }
+      } else {
+        // CREATE MODE: Create new project
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + parseInt(formData.duration));
+
+        const projectPayload = {
+          title: formData.title,
+          shortDescription: formData.shortDescription,
+          description: formData.description,
+          category: formData.category.toLowerCase(),
+          targetAmount: parseFloat(formData.fundingGoal),
+          deadlineAt: deadline.toISOString(),
+          images: formData.imageUrl ? [formData.imageUrl] : [],
+        };
+
+        const projectRes = await client.post('/projects', projectPayload);
+        const newProjectId = projectRes.data._id;
+
+        // Add Rewards
+        for (const reward of rewards) {
+          await client.post(`/projects/${newProjectId}/rewards`, {
+            title: reward.title,
+            description: reward.description,
+            price: reward.amount,
+            limit: null,
+          });
+        }
+
+        // Submit for Approval
+        await client.post(`/projects/${newProjectId}/submit`);
+
+        alert('Project submitted for review! An administrator will review it soon.');
+      }
+
       navigate('/');
     } catch (error: any) {
-      console.error('Failed to create project:', error);
-      alert(`Failed to create project: ${error.response?.data?.message || error.message}`);
+      console.error('Failed to save project:', error);
+      alert(`Failed to save project: ${error.response?.data?.message || error.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isSubmitting) {
+  if (isSubmitting || isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-        <p className="text-gray-600">Creating your project...</p>
+        <p className="text-gray-600">
+          {isLoading ? 'Loading project...' : isEditMode ? 'Updating your project...' : 'Creating your project...'}
+        </p>
       </div>
     );
   }
@@ -148,12 +271,14 @@ export function CreateProject({ user }: CreateProjectProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-6 border border-gray-200 space-y-6">
+      <div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 space-y-6">
         {step === 1 && (
           <>
             <div>
-              <h2 className="mb-2">Project Basics</h2>
-              <p className="text-gray-600">Start with the essential details about your project</p>
+              <h2 className="mb-2">{isEditMode ? 'Edit Project Basics' : 'Project Basics'}</h2>
+              <p className="text-gray-600">
+                {isEditMode ? 'Update the essential details about your project' : 'Start with the essential details about your project'}
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -384,12 +509,22 @@ export function CreateProject({ user }: CreateProjectProps) {
               Next
             </button>
           ) : (
-            <button
-              onClick={handleSubmit}
-              className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              Submit for Review
-            </button>
+            // Disable submit for users who are not founders/admins
+            (() => {
+              const canCreate = user.role === 'creator' || user.role === 'admin';
+              return (
+                <button
+                  onClick={() => canCreate && handleSubmit()}
+                  disabled={!canCreate || isSubmitting}
+                  title={canCreate ? 'Submit project for review' : 'You need the Founder role to create a project.'}
+                  className={`bg-primary text-white px-6 py-2 rounded-lg transition-colors ${
+                    !canCreate || isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'
+                  }`}
+                >
+                  Submit for Review
+                </button>
+              );
+            })()
           )}
         </div>
       </div>

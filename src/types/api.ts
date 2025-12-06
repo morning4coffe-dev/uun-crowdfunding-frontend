@@ -5,6 +5,7 @@ export interface User {
   lastName: string;
   fullName: string;
   roles: string[];
+  favorites?: string[];
   stats: {
     totalContributed: number;
     totalProjectsOwned: number;
@@ -78,17 +79,47 @@ export enum ContributionStatus {
   REFUNDED = 'refunded',
 }
 
+export enum PaymentProvider {
+  STRIPE = 'stripe',
+  GOPAY = 'gopay',
+}
+
+export interface PaymentInfo {
+  provider: PaymentProvider;
+  intentId: string;
+  chargeId?: string;
+  raw?: {
+    method?: string;
+    brand?: string;
+    last4?: string;
+    [key: string]: unknown;
+  };
+}
+
 export interface Contribution {
   _id: string;
-  userId: string;
-  projectId: string;
+  userId: string | null;
+  projectId: string | Project;
   rewardId: string | null;
   amount: number;
   currency: string;
   status: ContributionStatus;
+  payment?: PaymentInfo;
   paidAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreateContributionRequest {
+  projectId: string;
+  rewardId?: string | null;
+  amount: number;
+  currency: string;
+}
+
+export interface CreateContributionResponse {
+  contribution: Contribution;
+  clientSecret: string;
 }
 
 export interface AuthResponse {
