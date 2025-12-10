@@ -52,7 +52,7 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
             });
           })
           .filter(Boolean) as Project[];
-        
+
         // Remove duplicates if user backed same project multiple times
         const uniqueBackedProjects = Array.from(new Map(mappedBackedProjects.map(p => [p.id, p])).values());
 
@@ -69,8 +69,12 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-primary/20 rounded-full"></div>
+          <div className="absolute top-0 left-0 w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <p className="mt-4 text-gray-500">Loading your dashboard...</p>
       </div>
     );
   }
@@ -102,25 +106,29 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
   return (
     <div className="w-full mx-auto px-4 py-6 space-y-6 sm:max-w-7xl sm:px-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-primary to-purple-600 text-white rounded-2xl p-6">
-        <h2>Welcome back, {user.name}!</h2>
-        <p className="mt-2 text-white/90">
+      <div className="bg-gradient-to-r from-primary to-purple-600 text-white rounded-2xl p-6 animate-fade-in hover:shadow-xl transition-shadow duration-300">
+        <h2 className="animate-slide-up" style={{ animationDelay: '0.1s' }}>Welcome back, {user.name}!</h2>
+        <p className="mt-2 text-white/90 animate-slide-up" style={{ animationDelay: '0.2s' }}>
           Track your projects and discover new ideas to support
         </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {stats.map((stat) => {
+        {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="bg-white rounded-xl p-5 border border-gray-200">
+            <div
+              key={stat.label}
+              className="bg-white dark:bg-card rounded-xl p-5 border border-gray-200 animate-slide-up hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer group"
+              style={{ animationDelay: `${0.1 * (index + 1)}s` }}
+            >
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-gray-600">{stat.label}</p>
-                  <p className="mt-2">{stat.value}</p>
+                  <p className="mt-2 text-3xl font-bold group-hover:scale-110 transition-transform duration-200">{stat.value}</p>
                 </div>
-                <div className={`${stat.bgColor} ${stat.color} p-3 rounded-lg`}>
+                <div className={`${stat.bgColor} ${stat.color} p-3 rounded-lg group-hover:scale-110 transition-transform duration-200`}>
                   <Icon className="w-6 h-6" />
                 </div>
               </div>
@@ -137,11 +145,14 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
             <button className="text-primary hover:underline">View all</button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {createdProjects.map((project) => (
-              <div key={project.id} className="relative">
+            {createdProjects.map((project, index) => (
+              <div
+                key={project.id}
+                className="relative animate-slide-up"
+                style={{ animationDelay: `${0.05 * (index + 1)}s` }}
+              >
                 <ProjectCard
                   project={project}
-                  onViewProject={onViewProject}
                 />
                 {(project.status === 'draft' || project.status === 'pending') && (
                   <button
@@ -149,7 +160,7 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
                       e.preventDefault();
                       navigate(`/projects/${project.id}/edit`);
                     }}
-                    className="absolute top-3 right-3 bg-white px-3 py-1 rounded-full text-sm hover:bg-gray-50 transition-colors border border-gray-200 shadow-sm"
+                    className="absolute top-3 right-3 bg-white px-3 py-1 rounded-full text-sm hover:bg-gray-50 hover:scale-105 transition-all duration-200 border border-gray-200 shadow-sm"
                   >
                     Edit
                   </button>
@@ -172,7 +183,6 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
               <ProjectCard
                 key={project.id}
                 project={project}
-                onViewProject={onViewProject}
               />
             ))}
           </div>
@@ -180,27 +190,27 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
       )}
 
       {/* Quick Actions */}
-      <div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200">
+      <div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 animate-fade-in" style={{ animationDelay: '0.3s' }}>
         <h3 className="mb-4">Quick Actions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
             type="button"
             onClick={onCreate}
-            className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
+            className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 hover:scale-105 hover:shadow-lg transition-all duration-200 press-effect"
           >
             Start a New Project
           </button>
           <button
             type="button"
             onClick={() => navigate('/discover')}
-            className="bg-white border-2 border-primary text-primary px-6 py-3 rounded-lg hover:bg-primary/5 transition-colors"
+            className="bg-white dark:bg-card border-2 border-primary text-primary px-6 py-3 rounded-lg hover:bg-primary/5 hover:scale-105 transition-all duration-200 press-effect"
           >
             Discover Projects
           </button>
           <button
             type="button"
             onClick={() => navigate('/contributions')}
-            className="bg-white border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+            className="bg-white dark:bg-card border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2 press-effect"
           >
             <DollarSign className="w-5 h-5" />
             My Contributions

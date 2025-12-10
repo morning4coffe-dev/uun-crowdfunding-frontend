@@ -62,13 +62,13 @@ export function CreateProject({ user }: CreateProjectProps) {
 
       // Map rewards
       setRewards(
-        project.rewards.map((r) => ({
-          id: r.id,
-          title: r.title,
-          amount: r.price,
-          description: r.description,
-          estimatedDelivery: '', // Not stored in backend
-        }))
+          project.rewards.map((r) => ({
+            id: r.id,
+            title: r.title,
+            price: r.price,
+            description: r.description,
+            estimatedDelivery: '', // Not stored in backend
+          }))
       );
     } catch (error: any) {
       console.error('Failed to fetch project:', error);
@@ -87,7 +87,7 @@ export function CreateProject({ user }: CreateProjectProps) {
       {
         id: `reward-${Date.now()}`,
         title: '',
-        amount: 0,
+          price: 0,
         description: '',
         estimatedDelivery: '',
       },
@@ -156,7 +156,7 @@ export function CreateProject({ user }: CreateProjectProps) {
             await client.post(`/projects/${projectId}/rewards`, {
               title: reward.title,
               description: reward.description,
-              price: reward.amount,
+              price: reward.price,
               limit: null,
             });
           }
@@ -193,7 +193,7 @@ export function CreateProject({ user }: CreateProjectProps) {
           await client.post(`/projects/${newProjectId}/rewards`, {
             title: reward.title,
             description: reward.description,
-            price: reward.amount,
+            price: reward.price,
             limit: null,
           });
         }
@@ -438,9 +438,9 @@ export function CreateProject({ user }: CreateProjectProps) {
                         <label className="block mb-1 text-gray-600">Pledge Amount ($)</label>
                         <input
                           type="number"
-                          value={reward.amount || ''}
+                          value={reward.price || ''}
                           onChange={(e) =>
-                            handleRewardChange(index, 'amount', parseFloat(e.target.value))
+                            handleRewardChange(index, 'price', parseFloat(e.target.value))
                           }
                           placeholder="25"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"

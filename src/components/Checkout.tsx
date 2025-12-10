@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { X, Loader2, CreditCard, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { X, Loader2, CreditCard, AlertCircle, CheckCircle2, Shield, Sparkles } from 'lucide-react';
 import client from '../api/client';
 import { CreateContributionRequest, CreateContributionResponse, ContributionStatus } from '../types/api';
 import { Alert, AlertDescription } from './ui/alert';
 import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 
 interface CheckoutProps {
   projectId: string;
@@ -51,15 +50,11 @@ export function Checkout({
       setContributionId(contribution._id);
 
       // In a real implementation, you would use clientSecret with Stripe or GoPay SDK
-      // For now, we'll simulate payment processing and poll for status
-      console.log('Payment clientSecret received:', clientSecret);
-
-      // Simulate payment processing (in production, integrate with payment SDK)
       setPaymentStatus('polling');
       await simulatePaymentAndPoll(contribution._id);
     } catch (err: any) {
       console.error('Checkout failed:', err);
-      setError(err.response?.data?.message || 'Failed to process payment. Please try again.');
+      setError(err.response?.data?.message || err.message || 'Failed to process payment. Please try again.');
       setPaymentStatus('failed');
     } finally {
       setIsProcessing(false);
@@ -67,15 +62,14 @@ export function Checkout({
   };
 
   const simulatePaymentAndPoll = async (contribId: string) => {
-    // Poll for contribution status updates (webhook should update it)
     const maxAttempts = 10;
-    const pollInterval = 2000; // 2 seconds
+    const pollInterval = 2000;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       await new Promise(resolve => setTimeout(resolve, pollInterval));
 
       try {
-        const statusResponse = await client.get(`/contributions/${contribId}`);
+        const statusResponse = await client.get(`/contributions/${contribId}/status`);
         const status: ContributionStatus = statusResponse.data.status;
 
         if (status === ContributionStatus.SUCCEEDED) {
@@ -90,53 +84,59 @@ export function Checkout({
           setError('Payment failed. Please try again.');
           return;
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to check contribution status:', err);
       }
     }
 
-    // Timeout - payment still pending
     setPaymentStatus('idle');
     setError('Payment is taking longer than expected. Please check your contribution history.');
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle>Complete Your Pledge</CardTitle>
-              <CardDescription className="mt-2">
-                Support "{projectTitle}"
-              </CardDescription>
-            </div>
-            <button
-              onClick={onClose}
-              disabled={isProcessing}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </CardHeader>
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) onClose(); }}
+    >
+      <div className="bg-white dark:bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        {/* Header */}
+        <div className="relative bg-gradient-to-r from-primary to-purple-600 text-white p-6">
+          <button
+            onClick={onClose}
+            disabled={isProcessing}
+            className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition-colors disabled:opacity-50"
+          >
+            <X className="w-5 h-5" />
+          </button>
 
-        <CardContent className="space-y-4">
-          {/* Pledge Summary */}
-          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Reward</span>
-              <span className="font-medium">{rewardTitle}</span>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <Sparkles className="w-6 h-6" />
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Amount</span>
-              <span className="font-medium">
+            <div>
+              <h2 className="text-xl font-bold">Complete Your Pledge</h2>
+              <p className="text-white/80 text-sm">Support "{projectTitle}"</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-5">
+          {/* Pledge Summary */}
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 dark:text-gray-400">Reward</span>
+              <span className="font-medium text-gray-900 dark:text-white">{rewardTitle}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 dark:text-gray-400">Amount</span>
+              <span className="font-medium text-gray-900 dark:text-white">
                 {currency.toUpperCase()} {amount.toLocaleString()}
               </span>
             </div>
-            <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between">
-              <span className="font-semibold">Total</span>
-              <span className="font-semibold text-primary">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between items-center">
+              <span className="font-semibold text-gray-900 dark:text-white">Total</span>
+              <span className="text-2xl font-bold text-primary">
                 {currency.toUpperCase()} {amount.toLocaleString()}
               </span>
             </div>
@@ -144,45 +144,41 @@ export function Checkout({
 
           {/* Payment Status Messages */}
           {paymentStatus === 'succeeded' && (
-            <Alert className="border-green-200 bg-green-50">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                Payment successful! Thank you for your support.
+            <Alert className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30">
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <AlertDescription className="text-green-800 dark:text-green-300 font-medium">
+                Payment successful! Thank you for your support. 🎉
               </AlertDescription>
             </Alert>
           )}
 
           {error && (
             <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
+              <AlertCircle className="h-5 w-5" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           {paymentStatus === 'polling' && (
-            <Alert className="border-blue-200 bg-blue-50">
-              <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-              <AlertDescription className="text-blue-800">
-                Processing your payment...
+            <Alert className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+              <AlertDescription className="text-blue-800 dark:text-blue-300">
+                Processing your payment securely...
               </AlertDescription>
             </Alert>
           )}
 
-          {/* Payment Info */}
+          {/* Security Badge */}
           {paymentStatus === 'idle' && (
-            <div className="space-y-3">
-              <p className="text-sm text-gray-600">
-                Click below to proceed with payment. You'll be able to use Stripe or GoPay to complete your contribution.
-              </p>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <CreditCard className="w-4 h-4" />
-                <span>Secure payment processing</span>
-              </div>
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <Shield className="w-4 h-4 text-green-500" />
+              <span>Secure payment powered by Stripe</span>
             </div>
           )}
-        </CardContent>
+        </div>
 
-        <CardFooter className="flex gap-3">
+        {/* Footer */}
+        <div className="p-6 pt-0 flex gap-3">
           <Button
             variant="outline"
             onClick={onClose}
@@ -194,7 +190,7 @@ export function Checkout({
           <Button
             onClick={handleCheckout}
             disabled={isProcessing || paymentStatus === 'succeeded'}
-            className="flex-1"
+            className="flex-1 bg-gradient-to-r from-primary to-purple-600 hover:opacity-90"
           >
             {isProcessing ? (
               <>
@@ -202,13 +198,19 @@ export function Checkout({
                 Processing...
               </>
             ) : paymentStatus === 'succeeded' ? (
-              'Completed'
+              <>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Completed!
+              </>
             ) : (
-              'Proceed to Payment'
+              <>
+                <CreditCard className="w-4 h-4 mr-2" />
+                Pay Now
+              </>
             )}
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

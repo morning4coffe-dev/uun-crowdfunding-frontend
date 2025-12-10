@@ -18,10 +18,12 @@ import type { ReactNode } from 'react';
 export interface Reward {
   id: string;
   title: string;
-  amount: number;
+  price: number;
+  amount?: number; // backward compat
   description: string;
   backerCount: number;
   estimatedDelivery: string;
+  currency?: string;
 }
 
 export interface Project {

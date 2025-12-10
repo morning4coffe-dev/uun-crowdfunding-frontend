@@ -1,10 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Alert, AlertDescription } from './ui/alert';
-import { Loader2, Lock, Mail, Heart, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function Login() {
@@ -49,207 +44,613 @@ export function Login() {
   };
 
   return (
-    <div className="w-full min-h-screen lg:grid lg:grid-cols-2">
-
-      {/* LEFT SIDE: Visuals (Hidden on Mobile, Visible on Desktop) */}
-      <div className="hidden bg-zinc-900 lg:flex flex-col justify-between p-12 text-white relative overflow-hidden">
-        {/* Subtle background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-800 to-black z-0" />
-
-        <div className="relative z-10 flex items-center gap-2 text-xl font-semibold">
-          <div className="flex items-center justify-center w-8 h-8 bg-white/10 rounded-lg backdrop-blur-sm">
-            <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
+    <div className="login-page">
+      {/* Left Panel - Branding & Visual */}
+      <div className="login-visual">
+        <div className="login-visual__overlay" />
+        <div className="login-visual__content">
+          <div className="login-visual__logo">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="login-visual__logo-icon">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+            <span className="login-visual__logo-text">FundIt</span>
           </div>
-          FundIt
-        </div>
 
-        <div className="relative z-10 mt-auto space-y-4 max-w-lg">
-          <blockquote className="text-lg font-medium leading-relaxed text-zinc-300">
-            "This platform completely transformed how we approached our seed funding. The community support is unmatched."
-          </blockquote>
-          <div className="flex items-center gap-4 pt-4 border-t border-white/10">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-400 to-orange-400" />
-            <div>
-              <div className="font-semibold">Alex Chen</div>
-              <div className="text-xs text-zinc-500">Founder, Orbit UI</div>
+          <div className="login-visual__testimonial">
+            <blockquote className="login-visual__quote">
+              "This platform completely transformed how we approached our seed funding. The community support is unmatched."
+            </blockquote>
+            <div className="login-visual__author">
+              <div className="login-visual__avatar" />
+              <div className="login-visual__author-info">
+                <div className="login-visual__author-name">Alex Chen</div>
+                <div className="login-visual__author-role">Founder, Orbit UI</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* RIGHT SIDE: Form (Centered on Mobile) */}
-      <div className="flex items-center justify-center py-12 px-4 sm:px-8 bg-background">
-        <div className="mx-auto flex w-full flex-col justify-center space-y-6 max-w-sm">
-
+      {/* Right Panel - Form */}
+      <div className="login-form-container">
+        <div className="login-card">
           {/* Mobile Logo */}
-          <div className="flex flex-col space-y-2 text-center lg:text-left">
-            <div className="lg:hidden flex justify-center mb-4">
-              <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-xl">
-                <Heart className="w-6 h-6 text-primary fill-primary" />
-              </div>
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              {isLogin ? 'Welcome back' : 'Create an account'}
+          <div className="login-card__mobile-logo">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+          </div>
+
+          {/* Header */}
+          <div className="login-card__header">
+            <h1 className="login-card__title">
+              {isLogin ? 'Welcome back' : 'Create account'}
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="login-card__subtitle">
               {isLogin
                 ? 'Enter your credentials to access your account'
-                : 'Enter your information below to get started'}
+                : 'Start your crowdfunding journey today'}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="login-form">
             {!isLogin && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
+              <div className="login-form__row">
+                <div className="login-form__field">
+                  <label htmlFor="firstName" className="login-form__label">First name</label>
+                  <input
                     id="firstName"
+                    type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="John"
                     required
                     disabled={isLoading}
-                    className="pl-3"
+                    className="login-form__input"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
+                <div className="login-form__field">
+                  <label htmlFor="lastName" className="login-form__label">Last name</label>
+                  <input
                     id="lastName"
+                    type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Doe"
                     required
                     disabled={isLoading}
-                    className="pl-3"
+                    className="login-form__input"
                   />
                 </div>
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative group">
-                {/* ICON LEFT */}
-                <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                  <Mail className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                </div>
-                {/* INPUT (Added pl-10 to prevent overlap) */}
-                <Input
+            <div className="login-form__field">
+              <label htmlFor="email" className="login-form__label">Email address</label>
+              <div className="login-form__input-wrapper">
+                <svg className="login-form__input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </svg>
+                <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-12"
                   placeholder="name@example.com"
                   required
                   disabled={isLoading}
+                  className="login-form__input login-form__input--with-icon"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+            <div className="login-form__field">
+              <div className="login-form__label-row">
+                <label htmlFor="password" className="login-form__label">Password</label>
                 {isLogin && (
-                  <a href="#" className="text-xs font-medium text-primary hover:underline">
-                    Forgot password?
-                  </a>
+                  <a href="#" className="login-form__forgot">Forgot password?</a>
                 )}
               </div>
-              <div className="relative group">
-                {/* ICON LEFT */}
-                <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                  <Lock className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                </div>
-
-                {/* INPUT (Added pl-10 left, pr-10 right) */}
-                <Input
+              <div className="login-form__input-wrapper">
+                <svg className="login-form__input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-12 pr-12"
                   placeholder="••••••••"
                   required
                   disabled={isLoading}
                   minLength={6}
+                  className="login-form__input login-form__input--with-icon login-form__input--with-toggle"
                 />
-
-                {/* ICON RIGHT (Eye Toggle) */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full p-1 text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="login-form__toggle-password"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
                 </button>
               </div>
             </div>
 
             {/* Error Display */}
             {error && (
-              <Alert variant="destructive" className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+              <div className="login-form__error">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <span>{error}</span>
+              </div>
             )}
 
-            <Button type="submit" className="w-full font-semibold text-white" disabled={isLoading}>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="login-form__submit"
+            >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Please wait
+                  <svg className="login-form__spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                  Please wait...
                 </>
               ) : (
-                isLogin ? 'Sign In' : 'Create Account'
+                isLogin ? 'Sign in' : 'Create account'
               )}
-            </Button>
+            </button>
           </form>
 
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-muted" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
+          {/* Toggle Mode */}
+          <p className="login-card__toggle">
+            {isLogin ? "Don't have an account? " : 'Already have an account? '}
+            <button
+              type="button"
+              onClick={handleToggleMode}
+              disabled={isLoading}
+              className="login-card__toggle-link"
+            >
+              {isLogin ? 'Sign up' : 'Sign in'}
+            </button>
+          </p>
 
-          {/* Toggle Login/Register */}
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleToggleMode}
-            disabled={isLoading}
-          >
-            {isLogin ? (
-              <span className="flex items-center">
-                Don't have an account? Sign Up <ArrowRight className="ml-2 h-4 w-4" />
-              </span>
-            ) : (
-              'Already have an account? Sign In'
-            )}
-          </Button>
-
-          {/* Footer Text */}
-          <p className="text-center text-xs text-muted-foreground leading-relaxed px-6">
-            By clicking continue, you agree to our{' '}
-            <a href="#" className="underline underline-offset-4 hover:text-primary">
-              Terms of Service
-            </a>{' '}
-            and{' '}
-            <a href="#" className="underline underline-offset-4 hover:text-primary">
-              Privacy Policy
-            </a>
-            .
+          {/* Footer */}
+          <p className="login-card__footer">
+            By continuing, you agree to our{' '}
+            <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
           </p>
         </div>
       </div>
+
+      <style>{`
+        .login-page {
+          display: grid;
+          min-height: 100vh;
+          background: #0a0a0b;
+        }
+        
+        @media (min-width: 1024px) {
+          .login-page {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+
+        /* === Left Visual Panel === */
+        .login-visual {
+          display: none;
+          position: relative;
+          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+          overflow: hidden;
+        }
+        
+        @media (min-width: 1024px) {
+          .login-visual {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 3rem;
+          }
+        }
+
+        .login-visual__overlay {
+          position: absolute;
+          inset: 0;
+          background: 
+            radial-gradient(ellipse at 20% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 70%);
+        }
+
+        .login-visual__content {
+          position: relative;
+          z-index: 10;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          height: 100%;
+        }
+
+        .login-visual__logo {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .login-visual__logo-icon {
+          width: 2rem;
+          height: 2rem;
+          color: #f43f5e;
+        }
+
+        .login-visual__logo-text {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: white;
+          letter-spacing: -0.025em;
+        }
+
+        .login-visual__testimonial {
+          max-width: 28rem;
+        }
+
+        .login-visual__quote {
+          font-size: 1.25rem;
+          font-weight: 500;
+          line-height: 1.75;
+          color: rgba(255, 255, 255, 0.9);
+          margin: 0 0 1.5rem 0;
+          font-style: italic;
+        }
+
+        .login-visual__author {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-visual__avatar {
+          width: 3rem;
+          height: 3rem;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #f43f5e, #fb923c);
+        }
+
+        .login-visual__author-name {
+          font-weight: 600;
+          color: white;
+        }
+
+        .login-visual__author-role {
+          font-size: 0.875rem;
+          color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* === Right Form Panel === */
+        .login-form-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem 1.5rem;
+          background: #fafafa;
+        }
+
+        @media (min-width: 640px) {
+          .login-form-container {
+            padding: 3rem 2rem;
+          }
+        }
+
+        .login-card {
+          width: 100%;
+          max-width: 400px;
+        }
+
+        .login-card__mobile-logo {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 2rem;
+        }
+        
+        @media (min-width: 1024px) {
+          .login-card__mobile-logo {
+            display: none;
+          }
+        }
+
+        .login-card__mobile-logo svg {
+          width: 3rem;
+          height: 3rem;
+          color: #f43f5e;
+        }
+
+        .login-card__header {
+          text-align: center;
+          margin-bottom: 2rem;
+        }
+        
+        @media (min-width: 1024px) {
+          .login-card__header {
+            text-align: left;
+          }
+        }
+
+        .login-card__title {
+          font-size: 1.875rem;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 0 0 0.5rem 0;
+          letter-spacing: -0.025em;
+        }
+
+        .login-card__subtitle {
+          font-size: 0.9375rem;
+          color: #64748b;
+          margin: 0;
+        }
+
+        /* === Form Styles === */
+        .login-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+
+        .login-form__row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+
+        .login-form__field {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .login-form__label-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .login-form__label {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #374151;
+        }
+
+        .login-form__forgot {
+          font-size: 0.8125rem;
+          font-weight: 500;
+          color: #6366f1;
+          text-decoration: none;
+          transition: color 0.15s ease;
+        }
+
+        .login-form__forgot:hover {
+          color: #4f46e5;
+          text-decoration: underline;
+        }
+
+        .login-form__input-wrapper {
+          position: relative;
+        }
+
+        .login-form__input-icon {
+          position: absolute;
+          left: 0.875rem;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 1.125rem;
+          height: 1.125rem;
+          color: #9ca3af;
+          pointer-events: none;
+          transition: color 0.15s ease;
+        }
+
+        .login-form__input-wrapper:focus-within .login-form__input-icon {
+          color: #6366f1;
+        }
+
+        .login-form__input {
+          width: 100%;
+          height: 2.875rem;
+          padding: 0 1rem;
+          font-size: 0.9375rem;
+          color: #1f2937;
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.625rem;
+          outline: none;
+          transition: all 0.15s ease;
+        }
+
+        .login-form__input::placeholder {
+          color: #9ca3af;
+        }
+
+        .login-form__input:focus {
+          border-color: #6366f1;
+          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .login-form__input:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .login-form__input--with-icon {
+          padding-left: 2.75rem;
+        }
+
+        .login-form__input--with-toggle {
+          padding-right: 2.75rem;
+        }
+
+        .login-form__toggle-password {
+          position: absolute;
+          right: 0.75rem;
+          top: 50%;
+          transform: translateY(-50%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 2rem;
+          height: 2rem;
+          padding: 0;
+          background: none;
+          border: none;
+          border-radius: 0.375rem;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .login-form__toggle-password svg {
+          width: 1.125rem;
+          height: 1.125rem;
+          color: #9ca3af;
+          transition: color 0.15s ease;
+        }
+
+        .login-form__toggle-password:hover {
+          background: #f3f4f6;
+        }
+
+        .login-form__toggle-password:hover svg {
+          color: #4b5563;
+        }
+
+        .login-form__error {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.875rem 1rem;
+          font-size: 0.875rem;
+          color: #dc2626;
+          background: #fef2f2;
+          border: 1px solid #fecaca;
+          border-radius: 0.625rem;
+        }
+
+        .login-form__error svg {
+          width: 1.125rem;
+          height: 1.125rem;
+          flex-shrink: 0;
+        }
+
+        .login-form__submit {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          height: 2.875rem;
+          margin-top: 0.5rem;
+          font-size: 0.9375rem;
+          font-weight: 600;
+          color: white;
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          border: none;
+          border-radius: 0.625rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .login-form__submit:hover:not(:disabled) {
+          background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+          transform: translateY(-1px);
+        }
+
+        .login-form__submit:active:not(:disabled) {
+          transform: translateY(0);
+        }
+
+        .login-form__submit:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
+        .login-form__spinner {
+          width: 1.25rem;
+          height: 1.25rem;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        /* === Toggle & Footer === */
+        .login-card__toggle {
+          text-align: center;
+          margin-top: 1.5rem;
+          font-size: 0.9375rem;
+          color: #64748b;
+        }
+
+        .login-card__toggle-link {
+          font-weight: 600;
+          color: #6366f1;
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          transition: color 0.15s ease;
+        }
+
+        .login-card__toggle-link:hover {
+          color: #4f46e5;
+          text-decoration: underline;
+        }
+
+        .login-card__toggle-link:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .login-card__footer {
+          text-align: center;
+          margin-top: 2rem;
+          font-size: 0.8125rem;
+          color: #94a3b8;
+          line-height: 1.5;
+        }
+
+        .login-card__footer a {
+          color: #64748b;
+          text-decoration: underline;
+          text-underline-offset: 2px;
+          transition: color 0.15s ease;
+        }
+
+        .login-card__footer a:hover {
+          color: #475569;
+        }
+      `}</style>
     </div>
   );
 }

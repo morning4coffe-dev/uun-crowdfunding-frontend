@@ -2,6 +2,7 @@ import { Project as ApiProject } from '../types/api';
 import { Project as UiProject } from '../App';
 
 export function mapApiProjectToUiProject(apiProject: ApiProject): UiProject {
+  const stats = apiProject.stats || ({ currentAmount: 0, backerCount: 0 } as any);
   const daysLeft = Math.max(
     0,
     Math.ceil(
@@ -26,15 +27,16 @@ export function mapApiProjectToUiProject(apiProject: ApiProject): UiProject {
     shortDescription: apiProject.shortDescription,
     category: apiProject.category,
     image: apiProject.images[0] || 'https://placehold.co/600x400',
-    currentFunding: apiProject.stats.currentAmount,
+    currentFunding: stats.currentAmount,
     fundingGoal: apiProject.targetAmount,
-    backerCount: apiProject.stats.backerCount,
+    backerCount: stats.backerCount,
     daysLeft,
     status: apiProject.status.toLowerCase() as any,
     rewards: apiProject.rewards.map((r) => ({
       id: r.id,
       title: r.title,
-      amount: r.price,
+      price: r.price,
+      currency: r.currency,
       description: r.description,
       backerCount: r.backersCount,
       estimatedDelivery: 'Unknown', // Not in API reward model

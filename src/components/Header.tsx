@@ -107,15 +107,14 @@ export function Header({ userRole }: HeaderProps) {
         <div className="flex items-center gap-2 md:gap-3">
           {isWide ? (
             <form onSubmit={handleSearchSubmit} className="hidden md:block max-[700px]:hidden">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search projects"
-                className="pl-10 pr-4 py-2 w-64 bg-white/80 dark:bg-card/80 border border-gray-200 focus:border-primary focus:ring-primary"
-              />
-            </div>
+              <div className="relative">
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search projects"
+                  className="pl-4 pr-10 py-2 w-64 bg-white/80 dark:bg-card/80 border-2 border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
             </form>
           ) : null}
 
@@ -123,7 +122,7 @@ export function Header({ userRole }: HeaderProps) {
             <Search className="w-5 h-5 text-gray-600" />
           </button>
 
-          
+
 
           <Button type="button" onClick={() => navigate('/create')} className="hidden md:inline-flex bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
             Launch
