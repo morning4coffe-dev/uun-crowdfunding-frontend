@@ -169,7 +169,7 @@ export function ContributionList() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Contributed</p>
-                  <p className="text-3xl font-bold text-primary">${totalAmount.toLocaleString()}</p>
+                  <p className="text-3xl font-bold text-primary">{totalAmount.toLocaleString()}</p>
                 </div>
                 <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-primary" />

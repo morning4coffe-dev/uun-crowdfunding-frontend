@@ -11,7 +11,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronRight,
-  Sparkles,
+  Gift,
   Target,
   TrendingUp
 } from 'lucide-react';
@@ -58,6 +58,7 @@ export function ProjectDetail() {
 
     fetchProject();
   }, [projectId]);
+
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -256,9 +257,9 @@ export function ProjectDetail() {
           <div className="flex items-center justify-between gap-2 mb-5 py-4 border-y border-gray-100 dark:border-gray-700">
             <div className="flex-1 text-center">
               <div className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-                ${project.currentFunding.toLocaleString()}
+                {project.currency.toUpperCase()} {project.currentFunding.toLocaleString()}
               </div>
-              <p className="text-xs text-gray-500">of ${project.fundingGoal.toLocaleString()}</p>
+              <p className="text-xs text-gray-500">of {project.currency.toUpperCase()} {project.fundingGoal.toLocaleString()}</p>
             </div>
             <div className="w-px h-10 bg-gray-200 dark:bg-gray-700" />
             <div className="flex-1 text-center">
@@ -289,7 +290,7 @@ export function ProjectDetail() {
               </>
             ) : (
               <>
-                <Sparkles className="w-5 h-5" />
+                <Target className="w-5 h-5" />
                 Back this project
               </>
             )}
@@ -324,13 +325,13 @@ export function ProjectDetail() {
         {/* Rewards Section */}
         <div id="rewards-section" className="space-y-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
+            <Gift className="w-5 h-5 text-primary" />
             Select your reward
           </h2>
 
           {apiProject && apiProject.rewards.length === 0 && (
             <div className="bg-white dark:bg-card rounded-xl p-8 border border-gray-200 dark:border-gray-700 text-center">
-              <Sparkles className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <Gift className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500">No reward tiers available yet</p>
             </div>
           )}
@@ -431,7 +432,7 @@ export function ProjectDetail() {
           rewardId={selectedReward}
           rewardTitle={getSelectedRewardDetails()?.title || 'Selected Reward'}
           amount={getSelectedRewardDetails()?.price || 0}
-          currency={getSelectedRewardDetails()?.currency || 'usd'}
+          currency={getSelectedRewardDetails()?.currency || 'CZK'}
           onClose={() => setShowCheckout(false)}
           onSuccess={handleCheckoutSuccess}
         />

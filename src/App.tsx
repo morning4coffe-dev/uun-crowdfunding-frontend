@@ -38,6 +38,7 @@ export interface Project {
   video?: string;
   currentFunding: number;
   fundingGoal: number;
+  currency: string;
   backerCount: number;
   daysLeft: number;
   status: 'draft' | 'pending' | 'active' | 'funded' | 'ended';

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Clock, CheckCircle, Loader2, DollarSign } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle, Loader2, DollarSign, FolderOpen, Heart, Plus } from 'lucide-react';
 import { User, Project } from '../App';
 import { ProjectCard } from './ProjectCard';
 import client from '../api/client';
@@ -138,12 +138,14 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
       </div>
 
       {/* My Projects Section */}
-      {createdProjects.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3>My Projects</h3>
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3>My Projects</h3>
+          {createdProjects.length > 0 && (
             <button className="text-primary hover:underline">View all</button>
-          </div>
+          )}
+        </div>
+        {createdProjects.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {createdProjects.map((project, index) => (
               <div
@@ -157,6 +159,7 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
                 {(project.status === 'draft' || project.status === 'pending') && (
                   <button
                     onClick={(e) => {
+                      e.stopPropagation();
                       e.preventDefault();
                       navigate(`/projects/${project.id}/edit`);
                     }}
@@ -168,16 +171,36 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="bg-white dark:bg-card rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
+            <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FolderOpen className="w-8 h-8 text-blue-500" />
+            </div>
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No projects yet</h4>
+            <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto mb-4">
+              Ready to bring your idea to life? Start your first crowdfunding campaign and share it with the world.
+            </p>
+            <button
+              type="button"
+              onClick={onCreate}
+              className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-primary/90 hover:scale-105 transition-all duration-200"
+            >
+              <Plus className="w-4 h-4" />
+              Create Your First Project
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Backed Projects Section */}
-      {backedProjects.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3>Projects I'm Backing</h3>
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3>Projects I'm Backing</h3>
+          {backedProjects.length > 0 && (
             <button className="text-primary hover:underline">View all</button>
-          </div>
+          )}
+        </div>
+        {backedProjects.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {backedProjects.map((project) => (
               <ProjectCard
@@ -186,8 +209,25 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
               />
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="bg-white dark:bg-card rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
+            <div className="w-16 h-16 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Heart className="w-8 h-8 text-green-500" />
+            </div>
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No backed projects yet</h4>
+            <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto mb-4">
+              Discover amazing projects and support creators bringing their ideas to life.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate('/discover')}
+              className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-primary/90 hover:scale-105 transition-all duration-200"
+            >
+              Discover Projects
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Quick Actions */}
       <div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 animate-fade-in" style={{ animationDelay: '0.3s' }}>

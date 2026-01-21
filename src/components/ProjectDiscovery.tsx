@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, TrendingUp, Star, Clock, Loader2, Compass, Sparkles } from 'lucide-react';
+import { Search, Filter, TrendingUp, Star, Clock, Loader2, Compass, SearchX } from 'lucide-react';
 import { ProjectCard } from './ProjectCard';
 import client from '../api/client';
 import { mapApiProjectToUiProject } from '../utils/mappers';
@@ -189,7 +189,7 @@ export function ProjectDiscovery() {
         ) : (
           <div className="text-center py-20">
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="w-10 h-10 text-gray-400" />
+              <SearchX className="w-10 h-10 text-gray-400" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No projects found</h3>
             <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">

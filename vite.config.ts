@@ -56,6 +56,9 @@
     server: {
       port: 3000,
       open: true,
+      headers: {
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https: http:; connect-src 'self' http://localhost:* ws://localhost:* https://api.stripe.com https://*.stripe.com https://js.stripe.com; frame-src 'self' https://js.stripe.com https://*.stripe.com https://hooks.stripe.com; worker-src 'self' blob:;",
+      },
       proxy: {
         '/api': {
           target: 'http://localhost:4000',

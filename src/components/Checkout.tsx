@@ -1,7 +1,11 @@
-import { useState } from 'react';
-import { X, Loader2, CreditCard, AlertCircle, CheckCircle2, Shield, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { Loader2, CreditCard, AlertCircle, CheckCircle2, Shield, X } from 'lucide-react';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import type { StripeElementsOptions } from '@stripe/stripe-js';
 import client from '../api/client';
-import { CreateContributionRequest, CreateContributionResponse, ContributionStatus } from '../types/api';
+import { usePayment } from '../context/PaymentContext';
+import { CreateContributionRequest, CreateContributionResponse } from '../types/api';
 import { Alert, AlertDescription } from './ui/alert';
 import { Button } from './ui/button';
 
@@ -16,7 +20,107 @@ interface CheckoutProps {
   onSuccess: () => void;
 }
 
-export function Checkout({
+export function Checkout(props: CheckoutProps) {
+  const { stripePromise } = usePayment();
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const createContribution = async () => {
+      try {
+        const payload: CreateContributionRequest = {
+          projectId: props.projectId,
+          rewardId: props.rewardId,
+          amount: props.amount,
+          currency: props.currency,
+        };
+
+        const response = await client.post<CreateContributionResponse>('/contributions', payload);
+
+        if (isMounted) {
+          setClientSecret(response.data.clientSecret);
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          setError(err.response?.data?.message || err.message || 'Failed to initialize payment');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    createContribution();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [props.projectId, props.rewardId, props.amount, props.currency]);
+
+  if (isLoading) {
+    return (
+      <CheckoutModal onClose={props.onClose} isProcessing={true}>
+        <CheckoutHeader projectTitle={props.projectTitle} onClose={props.onClose} isProcessing={true} />
+        <div className="p-6 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <span className="ml-3 text-gray-600 dark:text-gray-400">Initializing payment...</span>
+        </div>
+      </CheckoutModal>
+    );
+  }
+
+  if (error) {
+    return (
+      <CheckoutModal onClose={props.onClose} isProcessing={false}>
+        <CheckoutHeader projectTitle={props.projectTitle} onClose={props.onClose} isProcessing={false} />
+        <div className="p-6">
+          <Alert variant="destructive">
+            <AlertCircle className="h-5 w-5" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+          <div className="mt-4">
+            <Button onClick={props.onClose} className="w-full">
+              Close
+            </Button>
+          </div>
+        </div>
+      </CheckoutModal>
+    );
+  }
+
+  if (!clientSecret) {
+    return null;
+  }
+
+  const options: StripeElementsOptions = {
+    clientSecret,
+    appearance: {
+      theme: 'stripe',
+      variables: {
+        colorPrimary: '#7c3aed',
+        colorBackground: '#ffffff',
+        colorText: '#1f2937',
+        colorDanger: '#ef4444',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        borderRadius: '8px',
+      },
+    },
+  };
+
+  return (
+    <Elements stripe={stripePromise} options={options} key={clientSecret}>
+      <CheckoutForm {...props} />
+    </Elements>
+  );
+}
+
+interface CheckoutFormProps extends CheckoutProps {}
+
+function CheckoutForm({
   projectId,
   projectTitle,
   rewardId,
@@ -25,161 +129,121 @@ export function Checkout({
   currency,
   onClose,
   onSuccess,
-}: CheckoutProps) {
+}: CheckoutFormProps) {
+  const stripe = useStripe();
+  const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'polling' | 'succeeded' | 'failed'>('idle');
-  const [contributionId, setContributionId] = useState<string | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'succeeded' | 'failed'>('idle');
 
-  const handleCheckout = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
     setPaymentStatus('processing');
 
     try {
-      const payload: CreateContributionRequest = {
-        projectId,
-        rewardId,
-        amount,
-        currency,
-      };
+      const { error: submitError, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/contributions`,
+        },
+        redirect: 'if_required',
+      });
 
-      const response = await client.post<CreateContributionResponse>('/contributions', payload);
-      const { contribution, clientSecret } = response.data;
-
-      setContributionId(contribution._id);
-
-      // In a real implementation, you would use clientSecret with Stripe or GoPay SDK
-      setPaymentStatus('polling');
-      await simulatePaymentAndPoll(contribution._id);
+      if (submitError) {
+        setError(submitError.message || 'Payment failed');
+        setPaymentStatus('failed');
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        setPaymentStatus('succeeded');
+        setTimeout(() => {
+          onSuccess();
+          onClose();
+        }, 2000);
+      } else if (paymentIntent && paymentIntent.status === 'processing') {
+        setPaymentStatus('processing');
+      } else {
+        setError('Payment failed. Please try again.');
+        setPaymentStatus('failed');
+      }
     } catch (err: any) {
-      console.error('Checkout failed:', err);
-      setError(err.response?.data?.message || err.message || 'Failed to process payment. Please try again.');
+      setError(err.message || 'An unexpected error occurred');
       setPaymentStatus('failed');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const simulatePaymentAndPoll = async (contribId: string) => {
-    const maxAttempts = 10;
-    const pollInterval = 2000;
-
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
-
-      try {
-        const statusResponse = await client.get(`/contributions/${contribId}/status`);
-        const status: ContributionStatus = statusResponse.data.status;
-
-        if (status === ContributionStatus.SUCCEEDED) {
-          setPaymentStatus('succeeded');
-          setTimeout(() => {
-            onSuccess();
-            onClose();
-          }, 2000);
-          return;
-        } else if (status === ContributionStatus.FAILED) {
-          setPaymentStatus('failed');
-          setError('Payment failed. Please try again.');
-          return;
-        }
-      } catch (err: any) {
-        console.error('Failed to check contribution status:', err);
-      }
-    }
-
-    setPaymentStatus('idle');
-    setError('Payment is taking longer than expected. Please check your contribution history.');
-  };
-
   return (
-    <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) onClose(); }}
-    >
-      <div className="bg-white dark:bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        {/* Header */}
-        <div className="relative bg-gradient-to-r from-primary to-purple-600 text-white p-6">
-          <button
-            onClick={onClose}
-            disabled={isProcessing}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition-colors disabled:opacity-50"
-          >
-            <X className="w-5 h-5" />
-          </button>
+    <CheckoutModal onClose={onClose} isProcessing={isProcessing}>
+      <CheckoutHeader projectTitle={projectTitle} onClose={onClose} isProcessing={isProcessing} />
 
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold">Complete Your Pledge</h2>
-              <p className="text-white/80 text-sm">Support "{projectTitle}"</p>
-            </div>
+      <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        {/* Pledge Summary */}
+        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 dark:text-gray-400">Reward</span>
+            <span className="font-medium text-gray-900 dark:text-white">{rewardTitle}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 dark:text-gray-400">Amount</span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              {currency.toUpperCase()} {amount.toLocaleString()}
+            </span>
+          </div>
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between items-center">
+            <span className="font-semibold text-gray-900 dark:text-white">Total</span>
+            <span className="text-2xl font-bold text-primary">
+              {currency.toUpperCase()} {amount.toLocaleString()}
+            </span>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-5">
-          {/* Pledge Summary */}
-          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Reward</span>
-              <span className="font-medium text-gray-900 dark:text-white">{rewardTitle}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Amount</span>
-              <span className="font-medium text-gray-900 dark:text-white">
-                {currency.toUpperCase()} {amount.toLocaleString()}
-              </span>
-            </div>
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between items-center">
-              <span className="font-semibold text-gray-900 dark:text-white">Total</span>
-              <span className="text-2xl font-bold text-primary">
-                {currency.toUpperCase()} {amount.toLocaleString()}
-              </span>
-            </div>
+        {/* Stripe Payment Element */}
+        {paymentStatus !== 'succeeded' && (
+          <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <PaymentElement
+              options={{
+                layout: 'tabs',
+              }}
+            />
           </div>
+        )}
 
-          {/* Payment Status Messages */}
-          {paymentStatus === 'succeeded' && (
-            <Alert className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <AlertDescription className="text-green-800 dark:text-green-300 font-medium">
-                Payment successful! Thank you for your support. 🎉
-              </AlertDescription>
-            </Alert>
-          )}
+        {/* Payment Status Messages */}
+        {paymentStatus === 'succeeded' && (
+          <Alert className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <AlertDescription className="text-green-800 dark:text-green-300 font-medium">
+              Payment successful! Thank you for your support.
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-5 w-5" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-5 w-5" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-          {paymentStatus === 'polling' && (
-            <Alert className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30">
-              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-              <AlertDescription className="text-blue-800 dark:text-blue-300">
-                Processing your payment securely...
-              </AlertDescription>
-            </Alert>
-          )}
+        {/* Security Badge */}
+        {paymentStatus === 'idle' && (
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <Shield className="w-4 h-4 text-green-500" />
+            <span>Secure payment powered by Stripe</span>
+          </div>
+        )}
 
-          {/* Security Badge */}
-          {paymentStatus === 'idle' && (
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <Shield className="w-4 h-4 text-green-500" />
-              <span>Secure payment powered by Stripe</span>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-6 pt-0 flex gap-3">
+        {/* Footer Buttons */}
+        <div className="flex gap-3 pt-2">
           <Button
+            type="button"
             variant="outline"
             onClick={onClose}
             disabled={isProcessing}
@@ -188,9 +252,9 @@ export function Checkout({
             Cancel
           </Button>
           <Button
-            onClick={handleCheckout}
-            disabled={isProcessing || paymentStatus === 'succeeded'}
-            className="flex-1 bg-gradient-to-r from-primary to-purple-600 hover:opacity-90"
+            type="submit"
+            disabled={!stripe || isProcessing || paymentStatus === 'succeeded'}
+            className="flex-1"
           >
             {isProcessing ? (
               <>
@@ -210,6 +274,72 @@ export function Checkout({
             )}
           </Button>
         </div>
+      </form>
+    </CheckoutModal>
+  );
+}
+
+// Reusable Modal Wrapper
+function CheckoutModal({
+  children,
+  onClose,
+  isProcessing
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+  isProcessing: boolean;
+}) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  const modalContent = (
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) onClose(); }}
+    >
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        {children}
+      </div>
+    </div>
+  );
+
+  return createPortal(modalContent, document.body);
+}
+
+// Header Component
+function CheckoutHeader({
+  projectTitle,
+  onClose,
+  isProcessing
+}: {
+  projectTitle: string;
+  onClose: () => void;
+  isProcessing: boolean;
+}) {
+  return (
+    <div className="relative bg-primary text-white p-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <CreditCard className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">Complete Payment</h2>
+            <p className="text-white/70 text-sm truncate max-w-[200px]">{projectTitle}</p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          disabled={isProcessing}
+          className="p-2 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50"
+          aria-label="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
     </div>
   );
