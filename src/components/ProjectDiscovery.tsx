@@ -117,7 +117,7 @@ export function ProjectDiscovery() {
                       : 'bg-white dark:bg-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-primary/50 hover:text-primary'
                     }`}
                 >
-                  {category === 'all' ? '✨ All' : category}
+                  {category === 'all' ? 'All' : category}
                 </button>
               ))}
             </div>
@@ -131,10 +131,10 @@ export function ProjectDiscovery() {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-card text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer"
             >
-              <option value="active">🟢 Active</option>
-              <option value="successful">🏆 Successful</option>
-              <option value="pendingApproval">⏳ Pending</option>
-              <option value="failed">❌ Failed</option>
+              <option value="active">Active</option>
+              <option value="successful">Successful</option>
+              <option value="pendingApproval">Pending</option>
+              <option value="failed">Failed</option>
             </select>
 
             {/* Sort Options */}
@@ -188,9 +188,7 @@ export function ProjectDiscovery() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <SearchX className="w-10 h-10 text-gray-400" />
-            </div>
+            <SearchX className="w-10 h-10 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No projects found</h3>
             <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
               Try adjusting your search or filters to discover more amazing projects.
