@@ -1,7 +1,7 @@
 
 # FundIt — Frontend (UI)
 
-  This folder contains the frontend application for the FundIt crowdfunding platform (original design in Figma).
+  This folder contains the frontend application for the FundIt crowdfunding platform (original design in Figma). [Backend](https://github.com/Arbest/crowdfunding-backend) is not part of this repo.
 
 ## Overview
 
