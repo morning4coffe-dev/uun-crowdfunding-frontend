@@ -1793,3 +1793,12 @@ html {
 html {
   overflow-y: scroll;
 }
+
+/* Press effect for buttons */
+.press-effect {
+  transition: transform 0.1s ease;
+}
+
+.press-effect:active {
+  transform: scale(0.98);
+}

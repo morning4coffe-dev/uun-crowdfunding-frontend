@@ -200,7 +200,7 @@ export function UserManagement() {
                       </div>
                       <div>
                         <span className="text-gray-600">Total Contributed:</span>
-                        <span className="ml-2 font-medium">${user.stats.totalContributed.toLocaleString()}</span>
+                        <span className="ml-2 font-medium">{user.stats.totalContributed.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>

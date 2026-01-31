@@ -29,6 +29,7 @@ export function mapApiProjectToUiProject(apiProject: ApiProject): UiProject {
     image: apiProject.images[0] || 'https://placehold.co/600x400',
     currentFunding: stats.currentAmount,
     fundingGoal: apiProject.targetAmount,
+    currency: apiProject.currency || 'CZK',
     backerCount: stats.backerCount,
     daysLeft,
     status: apiProject.status.toLowerCase() as any,
@@ -36,7 +37,7 @@ export function mapApiProjectToUiProject(apiProject: ApiProject): UiProject {
       id: r.id,
       title: r.title,
       price: r.price,
-      currency: r.currency,
+      currency: r.currency || apiProject.currency || 'CZK',
       description: r.description,
       backerCount: r.backersCount,
       estimatedDelivery: 'Unknown', // Not in API reward model

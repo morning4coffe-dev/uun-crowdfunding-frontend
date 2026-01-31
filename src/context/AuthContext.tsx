@@ -36,7 +36,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       }
     } catch (error: any) {
-      console.log('Auth check failed:', error.response?.status);
       setUser(null);
       // Clear any stale cookies
       document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
@@ -70,13 +69,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    console.log('Logout called, setting user to null');
     // Set user to null first to trigger immediate redirect
     setUser(null);
-    
+
     try {
       await client.post('/auth/logout');
-      console.log('Logout API call succeeded');
       // Clear the session cookie
       document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     } catch (error) {
@@ -93,7 +90,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const res = await client.post('/auth/toggle-founder');
         const newRoles = res.data.roles;
         setUser({ ...user, roles: newRoles });
-        console.log('Debug: toggled founder role. New roles:', newRoles);
       } catch (err) {
         console.error('toggleFounder error', err);
       }

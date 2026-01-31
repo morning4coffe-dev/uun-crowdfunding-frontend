@@ -263,7 +263,7 @@ export function UserProfile({ user }: UserProfileProps) {
           ) : (
             <>
               <div className="text-3xl font-bold text-primary mb-1 group-hover:scale-110 transition-transform duration-200">
-                ${totalPledged.toLocaleString()}
+                {totalPledged.toLocaleString()}
               </div>
               <p className="text-gray-600 flex items-center justify-center gap-2">
                 <TrendingUp className="w-4 h-4" />

@@ -32,7 +32,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-primary font-semibold">${project.currentFunding.toLocaleString()}</span>
+            <span className="text-primary font-semibold">{project.currency.toUpperCase()} {project.currentFunding.toLocaleString()}</span>
             <span className="text-gray-600 text-sm">
               {fundingPercentage.toFixed(0)}%
             </span>
@@ -44,7 +44,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             ></div>
           </div>
           <div className="text-gray-600 mt-1 text-sm">
-            of ${project.fundingGoal.toLocaleString()} goal
+            of {project.currency.toUpperCase()} {project.fundingGoal.toLocaleString()} goal
           </div>
         </div>
 

@@ -4,12 +4,15 @@ import App from "./App.tsx";
 import "./index.css";
 import { AuthProvider } from "./context/AuthContext";
 import { SettingsProvider } from "./context/SettingsContext";
+import { PaymentProvider } from "./context/PaymentContext";
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <AuthProvider>
       <SettingsProvider>
-        <App />
+        <PaymentProvider>
+          <App />
+        </PaymentProvider>
       </SettingsProvider>
     </AuthProvider>
   </BrowserRouter>
