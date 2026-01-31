@@ -153,7 +153,7 @@ export function ContributionList() {
 
   return (
     <>
-      <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+      <div className="w-full mx-auto px-4 py-8 space-y-6 sm:max-w-7xl sm:px-6">
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Contributions</h1>
@@ -164,7 +164,7 @@ export function ContributionList() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card className="bg-gradient-to-br from-primary/10 to-purple-500/10 border-0 animate-slide-up hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.1s' }}>
+          <Card className="rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border-0 animate-slide-up hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.1s' }}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -178,7 +178,7 @@ export function ContributionList() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-0 animate-slide-up hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.2s' }}>
+          <Card className="rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-0 animate-slide-up hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.2s' }}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -192,7 +192,7 @@ export function ContributionList() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-0 animate-slide-up hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.3s' }}>
+          <Card className="rounded-xl bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-0 animate-slide-up hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.3s' }}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -208,7 +208,7 @@ export function ContributionList() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
@@ -236,7 +236,7 @@ export function ContributionList() {
 
         {/* Contributions List */}
         {filteredContributions.length === 0 ? (
-          <Card className="animate-fade-in">
+          <Card className="animate-fade-in rounded-xl">
             <CardContent className="flex flex-col items-center justify-center py-16">
               <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
                 <DollarSign className="w-10 h-10 text-gray-400" />
@@ -265,13 +265,13 @@ export function ContributionList() {
               return (
                 <Card
                   key={contribution._id}
-                  className="cursor-pointer overflow-hidden group animate-slide-up hover:shadow-xl hover:border-primary/30 transition-all duration-300"
+                  className="cursor-pointer overflow-hidden group animate-slide-up hover:shadow-xl hover:border-primary/30 transition-all duration-300 rounded-xl"
                   style={{ animationDelay: `${0.05 * (index + 1)}s` }}
                   onClick={() => setSelectedContribution(contribution)}
                 >
                   <div className="flex">
                     {/* Project Image */}
-                    <div className="hidden sm:block w-32 h-32 bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden">
+                    <div className="hidden sm:block w-40 h-40 bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden">
                       {projectImage ? (
                         <img
                           src={projectImage}
@@ -286,10 +286,10 @@ export function ContributionList() {
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 p-4 sm:p-5">
+                    <div className="flex-1 p-5 sm:p-6">
                       <div className="flex items-start justify-between gap-4 mb-3">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">
+                          <h3 className="text-xl font-semibold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">
                             {getProjectTitle(contribution)}
                           </h3>
                           <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">

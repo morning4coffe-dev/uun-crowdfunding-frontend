@@ -27,6 +27,7 @@ export function CreateProject({ user }: CreateProjectProps) {
     imageUrl: '',
   });
   const [rewards, setRewards] = useState<Partial<Reward>[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (isEditMode && projectId) {
@@ -287,10 +288,18 @@ export function CreateProject({ user }: CreateProjectProps) {
                 <input
                   type="text"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, title: e.target.value });
+                    if (errors.title) setErrors({ ...errors, title: '' });
+                  }}
                   placeholder="Enter a clear, compelling title"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.title 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : 'border-gray-300 focus:ring-primary focus:border-transparent'
+                  }`}
                 />
+                {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
               </div>
 
               <div>
@@ -313,22 +322,38 @@ export function CreateProject({ user }: CreateProjectProps) {
                 <input
                   type="text"
                   value={formData.shortDescription}
-                  onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, shortDescription: e.target.value });
+                    if (errors.shortDescription) setErrors({ ...errors, shortDescription: '' });
+                  }}
                   placeholder="Brief tagline (max 100 characters)"
                   maxLength={100}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.shortDescription 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : 'border-gray-300 focus:ring-primary focus:border-transparent'
+                  }`}
                 />
+                {errors.shortDescription && <p className="text-red-500 text-sm mt-1">{errors.shortDescription}</p>}
               </div>
 
               <div>
                 <label className="block mb-2 text-gray-700">Full Description</label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, description: e.target.value });
+                    if (errors.description) setErrors({ ...errors, description: '' });
+                  }}
                   placeholder="Describe your project in detail..."
                   rows={6}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 resize-none ${
+                    errors.description 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : 'border-gray-300 focus:ring-primary focus:border-transparent'
+                  }`}
                 />
+                {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
               </div>
 
               <div>
@@ -375,11 +400,19 @@ export function CreateProject({ user }: CreateProjectProps) {
                   <input
                     type="number"
                     value={formData.fundingGoal}
-                    onChange={(e) => setFormData({ ...formData, fundingGoal: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, fundingGoal: e.target.value });
+                      if (errors.fundingGoal) setErrors({ ...errors, fundingGoal: '' });
+                    }}
                     placeholder="10000"
-                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className={`w-full pl-8 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                      errors.fundingGoal 
+                        ? 'border-red-500 focus:ring-red-500' 
+                        : 'border-gray-300 focus:ring-primary focus:border-transparent'
+                    }`}
                   />
                 </div>
+                {errors.fundingGoal && <p className="text-red-500 text-sm mt-1">{errors.fundingGoal}</p>}
               </div>
 
               <div>
@@ -503,7 +536,33 @@ export function CreateProject({ user }: CreateProjectProps) {
 
           {step < 3 ? (
             <button
-              onClick={() => setStep(step + 1)}
+              onClick={() => {
+                const newErrors: Record<string, string> = {};
+                if (step === 1) {
+                  if (!formData.title || formData.title.trim().length < 3) {
+                    newErrors.title = 'Title must be at least 3 characters';
+                  }
+                  if (!formData.shortDescription || formData.shortDescription.trim().length < 10) {
+                    newErrors.shortDescription = 'Short description must be at least 10 characters';
+                  }
+                  if (!formData.description || formData.description.trim().length < 50) {
+                    newErrors.description = 'Description must be at least 50 characters';
+                  }
+                } else if (step === 2) {
+                  const parsedFunding = parseFloat(formData.fundingGoal || '');
+                  if (isNaN(parsedFunding) || parsedFunding <= 0) {
+                    newErrors.fundingGoal = 'Funding goal must be a positive number';
+                  }
+                }
+
+                if (Object.keys(newErrors).length > 0) {
+                  setErrors(newErrors);
+                  return;
+                }
+                
+                setErrors({});
+                setStep(step + 1);
+              }}
               className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
             >
               Next

@@ -79,6 +79,13 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
     );
   }
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const stats = [
     {
       label: 'Projects Created',
@@ -86,6 +93,7 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
       icon: TrendingUp,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
+      onClick: () => scrollToSection('my-projects'),
     },
     {
       label: 'Projects Backed',
@@ -93,6 +101,7 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
       icon: CheckCircle,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
+      onClick: () => scrollToSection('backed-projects'),
     },
     {
       label: 'Active Campaigns',
@@ -100,6 +109,7 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
       icon: Clock,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
+      onClick: () => scrollToSection('my-projects'),
     },
   ];
 
@@ -120,7 +130,8 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
           return (
             <div
               key={stat.label}
-              className="bg-white dark:bg-card rounded-xl p-5 border border-gray-200 animate-slide-up hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer group"
+              onClick={stat.onClick}
+              className="bg-white dark:bg-[#1c1c1c] rounded-xl p-5 border border-gray-200 animate-slide-up hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer group"
               style={{ animationDelay: `${0.1 * (index + 1)}s` }}
             >
               <div className="flex items-start justify-between">
@@ -138,7 +149,7 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
       </div>
 
       {/* My Projects Section */}
-      <div>
+      <div id="my-projects">
         <div className="flex items-center justify-between mb-4">
           <h3>My Projects</h3>
           {createdProjects.length > 0 && (
@@ -172,10 +183,8 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
             ))}
           </div>
         ) : (
-          <div className="bg-white dark:bg-card rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
-            <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FolderOpen className="w-8 h-8 text-blue-500" />
-            </div>
+          <div className="bg-white dark:bg-[#1c1c1c] rounded-xl border border-gray-200 p-8 text-center">
+            <FolderOpen className="w-8 h-8 text-blue-500 dark:text-primary mx-auto mb-4" />
             <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No projects yet</h4>
             <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto mb-4">
               Ready to bring your idea to life? Start your first crowdfunding campaign and share it with the world.
@@ -183,9 +192,8 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
             <button
               type="button"
               onClick={onCreate}
-              className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-primary/90 hover:scale-105 transition-all duration-200"
+              className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 hover:scale-105 transition-all duration-200"
             >
-              <Plus className="w-4 h-4" />
               Create Your First Project
             </button>
           </div>
@@ -193,7 +201,7 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
       </div>
 
       {/* Backed Projects Section */}
-      <div>
+      <div id="backed-projects">
         <div className="flex items-center justify-between mb-4">
           <h3>Projects I'm Backing</h3>
           {backedProjects.length > 0 && (
@@ -210,10 +218,8 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
             ))}
           </div>
         ) : (
-          <div className="bg-white dark:bg-card rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
-            <div className="w-16 h-16 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Heart className="w-8 h-8 text-green-500" />
-            </div>
+          <div className="bg-white dark:bg-[#1c1c1c] rounded-xl border border-gray-200 p-8 text-center">
+            <Heart className="w-8 h-8 text-green-500 mx-auto mb-4" />
             <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No backed projects yet</h4>
             <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto mb-4">
               Discover amazing projects and support creators bringing their ideas to life.
@@ -221,7 +227,7 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
             <button
               type="button"
               onClick={() => navigate('/discover')}
-              className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-primary/90 hover:scale-105 transition-all duration-200"
+              className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 hover:scale-105 transition-all duration-200"
             >
               Discover Projects
             </button>
@@ -230,7 +236,7 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+      <div className="bg-white dark:bg-[#1c1c1c] rounded-xl p-6 border border-gray-200 animate-fade-in" style={{ animationDelay: '0.3s' }}>
         <h3 className="mb-4">Quick Actions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
@@ -243,14 +249,14 @@ export function Dashboard({ user, onViewProject, onCreate }: DashboardProps) {
           <button
             type="button"
             onClick={() => navigate('/discover')}
-            className="bg-white dark:bg-card border-2 border-primary text-primary px-6 py-3 rounded-lg hover:bg-primary/5 hover:scale-105 transition-all duration-200 press-effect"
+            className="bg-white dark:bg-transparent border-2 border-primary text-primary px-6 py-3 rounded-lg hover:bg-primary/5 hover:scale-105 transition-all duration-200 press-effect"
           >
             Discover Projects
           </button>
           <button
             type="button"
             onClick={() => navigate('/contributions')}
-            className="bg-white dark:bg-card border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2 press-effect"
+            className="bg-white dark:bg-transparent border-2 border-gray-300 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2 press-effect"
           >
             <DollarSign className="w-5 h-5" />
             My Contributions

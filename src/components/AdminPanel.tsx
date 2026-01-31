@@ -237,7 +237,7 @@ export function AdminPanel() {
                         <td className="px-6 py-4">
                           <span
                             className={`px-3 py-1 rounded-full ${
-                              project.status === 'pending' || project.status === 'pendingApproval'
+                              project.status === 'pending'
                                 ? 'bg-orange-100 text-orange-700'
                                 : project.status === 'active'
                                 ? 'bg-green-100 text-green-700'
@@ -248,7 +248,7 @@ export function AdminPanel() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          {(project.status === 'pending' || project.status === 'pendingApproval') ? (
+                          {project.status === 'pending' ? (
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleApprove(project.id)}

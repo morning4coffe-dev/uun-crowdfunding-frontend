@@ -125,7 +125,7 @@ export function Header({ userRole }: HeaderProps) {
 
 
           <Button type="button" onClick={() => navigate('/create')} className="hidden md:inline-flex bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
-            Launch
+            New Project
           </Button>
 
           <button

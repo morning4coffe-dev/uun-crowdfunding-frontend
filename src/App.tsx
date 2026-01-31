@@ -41,7 +41,7 @@ export interface Project {
   currency: string;
   backerCount: number;
   daysLeft: number;
-  status: 'draft' | 'pending' | 'active' | 'funded' | 'ended';
+  status: 'draft' | 'pending' | 'active' | 'funded' | 'ended' | 'rejected';
   rewards: Reward[];
   createdAt: string;
 }

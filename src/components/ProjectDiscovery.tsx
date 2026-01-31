@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, TrendingUp, Star, Clock, Loader2, Compass, SearchX } from 'lucide-react';
+import { Search, TrendingUp, Star, Clock, Compass, SearchX, Sparkles } from 'lucide-react';
 import { ProjectCard } from './ProjectCard';
 import client from '../api/client';
 import { mapApiProjectToUiProject } from '../utils/mappers';
@@ -129,7 +129,7 @@ export function ProjectDiscovery() {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-card text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer"
+              className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-card text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer"
             >
               <option value="active">🟢 Active</option>
               <option value="successful">🏆 Successful</option>
@@ -145,7 +145,7 @@ export function ProjectDiscovery() {
                   <button
                     key={option.id}
                     onClick={() => setSortBy(option.id)}
-                    className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium transition-all duration-200 ${sortBy === option.id
+                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all duration-200 ${sortBy === option.id
                         ? 'bg-primary text-white'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                       }`}

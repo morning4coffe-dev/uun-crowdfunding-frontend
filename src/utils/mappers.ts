@@ -1,4 +1,4 @@
-import { Project as ApiProject } from '../types/api';
+import { Project as ApiProject, ProjectStatus } from '../types/api';
 import { Project as UiProject } from '../App';
 
 export function mapApiProjectToUiProject(apiProject: ApiProject): UiProject {
@@ -32,7 +32,7 @@ export function mapApiProjectToUiProject(apiProject: ApiProject): UiProject {
     currency: apiProject.currency || 'CZK',
     backerCount: stats.backerCount,
     daysLeft,
-    status: apiProject.status.toLowerCase() as any,
+    status: mapApiStatusToUiStatus(apiProject.status),
     rewards: apiProject.rewards.map((r) => ({
       id: r.id,
       title: r.title,
@@ -45,3 +45,23 @@ export function mapApiProjectToUiProject(apiProject: ApiProject): UiProject {
     createdAt: apiProject.createdAt,
   };
 }
+
+function mapApiStatusToUiStatus(status: ProjectStatus): UiProject['status'] {
+  switch (status) {
+    case ProjectStatus.PENDING_APPROVAL:
+      return 'pending';
+    case ProjectStatus.ACTIVE:
+      return 'active';
+    case ProjectStatus.SUCCESSFUL:
+      return 'funded';
+    case ProjectStatus.FAILED:
+      return 'ended';
+    case ProjectStatus.REJECTED:
+      return 'rejected';
+    case ProjectStatus.DRAFT:
+      return 'draft';
+    default:
+      return 'ended';
+  }
+}
+

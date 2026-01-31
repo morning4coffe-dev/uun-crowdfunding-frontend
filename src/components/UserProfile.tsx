@@ -15,6 +15,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from './ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 import { toast } from 'sonner';
 import { useSettings } from '../context/SettingsContext';
 import client from '../api/client';
@@ -35,10 +46,43 @@ interface Activity {
 }
 
 export function UserProfile({ user }: UserProfileProps) {
-  const { logout } = useAuth();
+  const { user: authUser, logout, checkAuth } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { theme, setTheme, notificationSettings, updateNotificationSettings, location, setLocation } = useSettings();
   const navigate = useNavigate();
+
+  // Edit Profile state
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: ''
+  });
+
+  useEffect(() => {
+    if (authUser) {
+      setEditForm({
+        firstName: authUser.firstName,
+        lastName: authUser.lastName
+      });
+    }
+  }, [authUser]);
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsUpdating(true);
+    try {
+      await client.patch('/users/me', editForm);
+      await checkAuth();
+      toast.success('Profile updated successfully');
+      setIsEditOpen(false);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   // Real data states
   const [contributions, setContributions] = useState<Contribution[]>([]);
@@ -205,10 +249,48 @@ export function UserProfile({ user }: UserProfileProps) {
             </div>
           </div>
           <div className="flex gap-2">
-            <button className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-all duration-200 hover:scale-105 flex items-center gap-2">
-              <Edit2 className="w-4 h-4" />
-              Edit Profile
-            </button>
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+              <DialogTrigger asChild>
+                <button className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-all duration-200 hover:scale-105 flex items-center gap-2">
+                  <Edit2 className="w-4 h-4" />
+                  Edit Profile
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit Profile</DialogTitle>
+                  <DialogDescription>
+                    Make changes to your profile here. Click save when you're done.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleUpdateProfile}>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="firstName">First name</Label>
+                      <Input
+                        id="firstName"
+                        value={editForm.firstName}
+                        onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="lastName">Last name</Label>
+                      <Input
+                        id="lastName"
+                        value={editForm.lastName}
+                        onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" disabled={isUpdating}>
+                      {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Save changes
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>
@@ -369,9 +451,9 @@ export function UserProfile({ user }: UserProfileProps) {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="City, Country"
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
+                  className="flex-1 rounded-lg rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
                 />
-                <Button type="button" variant="outline" size="sm" onClick={handleLocationSave} className="hover:scale-105 transition-transform duration-200">
+                <Button type="button" variant="outline" size="sm" onClick={handleLocationSave} className="hover:scale-105 h-9 transition-transform duration-200">
                   Save
                 </Button>
               </div>

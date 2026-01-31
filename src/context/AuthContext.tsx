@@ -19,6 +19,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize from token if present
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // client interceptor will pick this up
+    }
+  }, []);
+
   const checkAuth = async () => {
     try {
       const response = await client.get('/users/me');
@@ -33,10 +41,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(userData);
       } else {
         setUser(null);
+        localStorage.removeItem('token');
         document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       }
     } catch (error: any) {
       setUser(null);
+      localStorage.removeItem('token');
       // Clear any stale cookies
       document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     } finally {
@@ -51,9 +61,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (data: { email: string; password: string }) => {
     const response = await client.post('/auth/login', data);
     const userData = response.data.user;
-    // Add fullName property if not present
     if (!userData.fullName) {
       userData.fullName = `${userData.firstName} ${userData.lastName}`;
+    }
+    const token = response.data.token;
+    if (token) {
+        localStorage.setItem('token', token);
     }
     setUser(userData);
   };
@@ -61,9 +74,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (data: { email: string; password: string; firstName: string; lastName: string }) => {
     const response = await client.post('/auth/register', data);
     const userData = response.data.user;
-    // Add fullName property if not present
     if (!userData.fullName) {
       userData.fullName = `${userData.firstName} ${userData.lastName}`;
+    }
+    const token = response.data.token;
+    if (token) {
+        localStorage.setItem('token', token);
     }
     setUser(userData);
   };
@@ -75,10 +91,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await client.post('/auth/logout');
       // Clear the session cookie
+      localStorage.removeItem('token');
       document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     } catch (error) {
       console.error('Logout error:', error);
       // Clear cookie even if API call fails
+      localStorage.removeItem('token');
       document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     }
   };

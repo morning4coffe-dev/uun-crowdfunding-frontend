@@ -647,8 +647,100 @@ export function Login() {
           transition: color 0.15s ease;
         }
 
+
         .login-card__footer a:hover {
           color: #475569;
+        }
+
+        /* === Dark Mode Support === */
+        .dark .login-form-container {
+          background: #0f172a;
+        }
+
+        .dark .login-card__title {
+          color: #f1f5f9;
+        }
+
+        .dark .login-card__subtitle {
+          color: #94a3b8;
+        }
+
+        .dark .login-form__label {
+          color: #cbd5e1;
+        }
+
+        .dark .login-form__input {
+          background: #1e293b;
+          border-color: #334155;
+          color: #f8fafc;
+        }
+
+        .dark .login-form__input::placeholder {
+          color: #64748b;
+        }
+
+        .dark .login-form__input:focus {
+          border-color: #6366f1;
+          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        .dark .login-form__input-icon {
+          color: #64748b;
+        }
+        
+        .dark .login-form__input-wrapper:focus-within .login-form__input-icon {
+          color: #818cf8;
+        }
+
+        .dark .login-form__toggle-password svg {
+          color: #64748b;
+        }
+
+        .dark .login-form__toggle-password:hover {
+          background: #334155;
+        }
+        
+        .dark .login-form__toggle-password:hover svg {
+          color: #94a3b8;
+        }
+
+        .dark .login-card__toggle {
+          color: #94a3b8;
+        }
+        
+        .dark .login-card__toggle-link {
+          color: #818cf8;
+        }
+        
+        .dark .login-card__toggle-link:hover {
+          color: #a5b4fc;
+        }
+
+        .dark .login-card__footer {
+          color: #64748b;
+        }
+
+        .dark .login-card__footer a {
+          color: #94a3b8;
+        }
+        
+
+        .dark .login-card__footer a:hover {
+          color: #cbd5e1;
+        }
+
+        .dark .login-form__error {
+          background: rgba(220, 38, 38, 0.1);
+          border-color: rgba(220, 38, 38, 0.2);
+          color: #f87171;
+        }
+
+        .dark .login-form__forgot {
+          color: #818cf8;
+        }
+
+        .dark .login-form__forgot:hover {
+          color: #a5b4fc;
         }
       `}</style>
     </div>

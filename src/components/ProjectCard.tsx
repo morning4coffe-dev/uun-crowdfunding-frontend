@@ -12,7 +12,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link
       to={`/projects/${project.id}`}
-      className="bg-white dark:bg-card rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl hover:border-primary/30 transition-all duration-300 cursor-pointer block group hover:-translate-y-1"
+      className="bg-white dark:bg-[#1c1c1c] rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl hover:border-primary/30 transition-all duration-300 cursor-pointer block group hover:-translate-y-1"
     >
       <div className="relative h-48 bg-gray-200 overflow-hidden">
         <img
@@ -28,27 +28,27 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
       <div className="p-5 space-y-3">
         <h4 className="line-clamp-1 group-hover:text-primary transition-colors duration-200">{project.title}</h4>
-        <p className="text-gray-600 line-clamp-2">{project.shortDescription}</p>
+        <p className="text-gray-600 dark:text-gray-400 line-clamp-2">{project.shortDescription}</p>
 
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-primary font-semibold">{project.currency.toUpperCase()} {project.currentFunding.toLocaleString()}</span>
-            <span className="text-gray-600 text-sm">
+            <span className="text-gray-600 dark:text-gray-400 text-sm">
               {fundingPercentage.toFixed(0)}%
             </span>
           </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-gray-200 dark:bg-[#333] rounded-full h-2 overflow-hidden">
             <div
               className="bg-primary h-2 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${Math.min(fundingPercentage, 100)}%` }}
             ></div>
           </div>
-          <div className="text-gray-600 mt-1 text-sm">
+          <div className="text-gray-600 dark:text-gray-400 mt-1 text-sm">
             of {project.currency.toUpperCase()} {project.fundingGoal.toLocaleString()} goal
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between pt-3 border-t border-gray-200">
           <div className="flex items-center gap-1 text-gray-600">
             <Users className="w-4 h-4" />
             <span className="text-sm">{project.backerCount} backers</span>
